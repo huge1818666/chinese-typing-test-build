@@ -28,6 +28,7 @@ jobs:
           mkdir -p dist
           docker buildx build \
             --platform linux/amd64 \
+            -t chinese-typing-test:latest \
             --output type=docker,dest=dist/chinese-typing-test-latest-linux-amd64.tar \
             .
 
@@ -35,6 +36,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/arm64 \
+            -t chinese-typing-test:latest \
             --output type=docker,dest=dist/chinese-typing-test-latest-linux-arm64.tar \
             .
 
