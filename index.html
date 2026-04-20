@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>中文打字测速</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="app-card">
+        <section id="lobbyScreen" class="screen">
+          <section class="hero hero-lobby">
+            <p class="eyebrow">Interview Console</p>
+            <h1>中文打字测速台</h1>
+            <p class="hero-copy">
+              外层界面用于录入候选人姓名、查看测试记录；进入测速页后，系统会在
+              <strong id="heroDurationValue">60 秒</strong> 内统计正确输入的汉字数量，并按
+              <strong id="heroThresholdValue">40 字/分钟</strong> 的面试标准自动判定。
+            </p>
+            <div class="rule-strip">
+              <span>先录姓名再测试</span>
+              <span>测试结果自动存档</span>
+              <span>记录保存在当前浏览器</span>
+              <span id="heroRuleValue">当前规则：60 秒 / 40 字/分钟</span>
+            </div>
+          </section>
+
+          <section class="lobby-grid">
+            <article class="panel candidate-panel">
+              <p class="section-label">候选人入口</p>
+              <h2>先录入姓名，再进入测试</h2>
+              <label class="input-label compact" for="candidateNameInput">候选人姓名</label>
+              <input
+                id="candidateNameInput"
+                class="name-input"
+                type="text"
+                maxlength="24"
+                placeholder="例如：张三"
+                autocomplete="off"
+              />
+              <p id="nameError" class="form-hint">
+                输入姓名后点击“进入测试”，成绩会自动保存到下方记录列表。
+              </p>
+
+              <label class="input-label compact" for="durationInput">测试规则</label>
+              <div class="config-grid">
+                <div class="config-field">
+                  <span class="config-label">测试时长（秒）</span>
+                  <input
+                    id="durationInput"
+                    class="name-input compact-input"
+                    type="number"
+                    min="10"
+                    max="600"
+                    step="5"
+                    value="60"
+                  />
+                </div>
+                <div class="config-field">
+                  <span class="config-label">达标线（字/分钟）</span>
+                  <input
+                    id="thresholdInput"
+                    class="name-input compact-input"
+                    type="number"
+                    min="1"
+                    max="500"
+                    step="1"
+                    value="40"
+                  />
+                </div>
+              </div>
+              <p id="configHint" class="form-hint">
+                这里的设置会用于本次测试，并同步保存到记录中。
+              </p>
+
+              <div class="actions">
+                <button id="enterTestButton" class="primary-btn" type="button">进入测试</button>
+                <button id="clearRecordsButton" class="ghost-btn" type="button">清空记录</button>
+              </div>
+            </article>
+
+            <article class="panel summary-panel">
+              <p class="section-label">记录概览</p>
+              <h2>本机浏览器中的测试数据</h2>
+              <div class="summary-grid">
+                <article class="metric-card accent">
+                  <span class="metric-label">累计测试</span>
+                  <strong id="totalCandidatesValue" class="metric-value">0</strong>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">达标人数</span>
+                  <strong id="passedCandidatesValue" class="metric-value">0</strong>
+                </article>
+                <article class="metric-card">
+                  <span class="metric-label">最近成绩</span>
+                  <strong id="latestSpeedValue" class="metric-value">暂无</strong>
+                </article>
+              </div>
+              <div class="notice-panel">
+                <strong>使用提示</strong>
+                <p>
+                  如果你后面通过爱快的动态域名对外访问，这里显示的是当前浏览器本地保存的记录，适合面试官在固定设备上统一查看。
+                </p>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel records-panel">
+            <div class="workspace-header">
+              <div>
+                <p class="section-label">测试记录</p>
+                <h2>候选人历史成绩</h2>
+              </div>
+              <span id="recordCountBadge" class="status-badge idle">0 条记录</span>
+            </div>
+
+            <div id="recordsEmpty" class="empty-state">
+              还没有测试记录。录入候选人姓名并完成一次测试后，成绩会自动出现在这里。
+            </div>
+
+            <div class="records-table-wrap">
+              <table class="records-table">
+                <thead>
+                  <tr>
+                    <th>候选人</th>
+                    <th>结果</th>
+                    <th>正确汉字</th>
+                    <th>速度</th>
+                    <th>准确率</th>
+                    <th>规则</th>
+                    <th>完成时间</th>
+                  </tr>
+                </thead>
+                <tbody id="recordsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section id="testScreen" class="screen" hidden>
+          <section class="hero hero-test">
+            <p class="eyebrow">Interview Session</p>
+            <div class="hero-row">
+              <div>
+                <h1>中文打字测速</h1>
+                <p class="hero-copy">
+                  当前候选人：<strong id="currentCandidateName">未设置</strong>。成绩会在测试结束后自动回写到外层记录页。
+                </p>
+              </div>
+              <div class="session-card">
+                <span class="session-label">面试达标线</span>
+                <strong id="sessionThresholdValue">40 字/分钟</strong>
+                <span id="sessionDurationHint" class="session-subcopy">测试时长 60 秒</span>
+                <button id="backToLobbyTopButton" class="ghost-btn small-btn" type="button">返回外层界面</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="dashboard">
+            <article class="metric-card accent">
+              <span class="metric-label">剩余时间</span>
+              <strong id="timeValue" class="metric-value">60s</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">正确汉字</span>
+              <strong id="correctValue" class="metric-value">0</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">当前速度</span>
+              <strong id="speedValue" class="metric-value">0 字/分钟</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">准确率</span>
+              <strong id="accuracyValue" class="metric-value">100%</strong>
+            </article>
+          </section>
+
+          <section class="workspace">
+            <div class="workspace-header">
+              <div>
+                <p class="section-label">题目文本</p>
+                <h2>请完整输入下方中文内容</h2>
+              </div>
+              <span id="statusBadge" class="status-badge idle">待开始</span>
+            </div>
+
+            <div class="passage-panel">
+              <p id="passageText" class="passage-text" aria-live="polite"></p>
+            </div>
+
+            <label class="input-label" for="typingInput">输入区域</label>
+            <textarea
+              id="typingInput"
+              class="typing-input"
+              placeholder="点击“开始测试”后，用中文输入法在这里输入。系统会在你输入第一个汉字时自动开始计时。"
+              spellcheck="false"
+              autocomplete="off"
+              autocapitalize="off"
+              autocorrect="off"
+            ></textarea>
+
+            <div class="actions">
+              <button id="startButton" class="primary-btn" type="button">开始测试</button>
+              <button id="resetButton" class="ghost-btn" type="button">重新开始</button>
+              <button id="nextButton" class="ghost-btn" type="button">换一篇题目</button>
+            </div>
+          </section>
+
+          <aside class="result-panel">
+            <div>
+              <p class="section-label">结果判定</p>
+              <h2 id="resultTitle">等待测试</h2>
+            </div>
+            <p id="resultDetail" class="result-detail">
+              测试结束后，这里会显示是否达标，以及与当前自定义规则的差距。
+            </p>
+            <ul class="result-list">
+              <li id="resultMeta">提示：测试中禁止粘贴，按 Enter 不会换行。</li>
+              <li id="recordSaveHint">测试结束后会自动保存一条候选人成绩记录。</li>
+            </ul>
+            <div class="actions">
+              <button id="returnLobbyButton" class="primary-btn" type="button">返回记录页</button>
+              <button id="restartSameCandidateButton" class="ghost-btn" type="button">同名再测一次</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
