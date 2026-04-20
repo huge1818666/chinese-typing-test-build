@@ -37,7 +37,6 @@ const dom = {
   heroDurationValue: document.querySelector("#heroDurationValue"),
   heroThresholdValue: document.querySelector("#heroThresholdValue"),
   heroRuleValue: document.querySelector("#heroRuleValue"),
-  totalCandidatesValue: document.querySelector("#totalCandidatesValue"),
   passedCandidatesValue: document.querySelector("#passedCandidatesValue"),
   latestSpeedValue: document.querySelector("#latestSpeedValue"),
   recordCountBadge: document.querySelector("#recordCountBadge"),
@@ -316,7 +315,6 @@ function renderRecords() {
   const passedRecords = state.records.filter((record) => record.passed).length;
   const latestRecord = state.records[0];
 
-  dom.totalCandidatesValue.textContent = String(totalRecords);
   dom.passedCandidatesValue.textContent = String(passedRecords);
   dom.latestSpeedValue.textContent = latestRecord
     ? `${latestRecord.speed} 字/分钟`
@@ -484,7 +482,7 @@ function saveCurrentRecord(finalMetrics, passed) {
   };
 
   state.records.unshift(record);
-  state.records = state.records.slice(0, 200);
+  state.records = state.records.slice(0, 10);
   persistRecords();
   renderRecords();
 }
